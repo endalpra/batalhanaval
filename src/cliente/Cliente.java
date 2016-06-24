@@ -22,10 +22,7 @@ public class Cliente {
 
     public Cliente() {
         ligado = true;
-
     }
-
-  
 
     public Socket criarConexao(String host, int porta) throws IOException {
         System.out.println("Esperando/criando conexão...");

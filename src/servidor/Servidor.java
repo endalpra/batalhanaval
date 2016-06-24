@@ -25,7 +25,7 @@ public class Servidor {
         //Criação da fila
         fila = new FilaJogadores<>();
         System.out.println("Instaciando FilaJogadores");
-        novoTabuleiro();       
+        novoTabuleiro();
     }
 
     public void addCliente(TarefaCliente c) {
@@ -120,7 +120,7 @@ public class Servidor {
     public TarefaCliente pegaProximoJogador() throws IOException {
         TarefaCliente tf = fila.proximo();
         tf.estado = Estados.VEZJOGAR;
-        tf.output.writeUTF("\n"+tabuleiro.desenhaTabuleiro()+"\n$ VezJogar");
+        tf.output.writeUTF("\n" + tabuleiro.desenhaTabuleiro() +"\n$ Seus pontos: "+tf.pontos+ "\n$ VezJogar");
         return tf;
     }
 
@@ -128,6 +128,10 @@ public class Servidor {
         tabuleiro = new Tabuleiro();
         System.out.println("Criando novo tabuleiro");
         System.out.println(tabuleiro.MostraPosicaoNavios());
+    }
+
+    public String rankink() {
+        return new Ranking().ordena(clientes);
     }
 
     public FilaJogadores<TarefaCliente> getFila() {

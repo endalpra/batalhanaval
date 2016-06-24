@@ -69,8 +69,7 @@ public class TarefaCliente implements Runnable {
 //                if (estado == Estados.VEZJOGAR) {
 //                    output.writeUTF("\nVezJogar");
 //                }
-               
-                 
+
                 msgCliente = input.readUTF();
                 System.out.println("Mensagem recebida do cliente " + socket.getInetAddress() + ": " + msgCliente);
 
@@ -92,8 +91,6 @@ public class TarefaCliente implements Runnable {
                                         //Chama o primeiro jogador a se logar para jogar
                                         if (fila.tamanho() == 1) {
                                             servidor.pegaProximoJogador();
-                                            //resposta += "\n" + tabuleiro.desenhaTabuleiro() + "\nVezJogar";
-                                            //resposta += "\n" + tabuleiro.desenhaTabuleiro();
                                         }
                                     } else {
                                         resposta = "LOGINREPLY#FAIL";
@@ -118,10 +115,7 @@ public class TarefaCliente implements Runnable {
                         switch (protocolo[0])//sempre 1a posicao terá a operacao
                         {
                             case "RANKING":
-                                for (TarefaCliente r : servidor.fila()) {
-                                    resposta += "Jogador: " + r.nome + "->Pontos: " + r.pontos + "\n";
-                                }
-                                //resposta = String.valueOf(this.pontos);
+                                resposta = servidor.rankink();
                                 break;
                             case "LOGOUT":
                                 estado = Estados.CONECTADO;
@@ -134,38 +128,41 @@ public class TarefaCliente implements Runnable {
                         }
                         break;
                     case VEZJOGAR:
-                        TiroEnum enumerador = tabuleiro.atirar(Integer.parseInt(protocolo[0]), Integer.parseInt(protocolo[1]));
-                        if (TiroEnum.AGUA == enumerador) {
-                            this.pontos += -1;
-                            resposta = "~";
-                            //Retira da fila o jogador que jogou
-                            fila.desenfilera();
-                            //Coloca jogador no final da fila
-                            fila.enfilera(this);
-                            //Chama próximo jogador
-                            estado = Estados.AUTENTICADO;
-                            servidor.pegaProximoJogador();
-                            //resposta += "\n" + tabuleiro.desenhaTabuleiro();
+                        try {
+                            TiroEnum enumerador = tabuleiro.atirar(Integer.parseInt(protocolo[0]), Integer.parseInt(protocolo[1]));
+                            if (TiroEnum.AGUA == enumerador) {
+                                this.pontos += -1;
+                                resposta = "~";
+                                //Retira da fila o jogador que jogou
+                                fila.desenfilera();
+                                //Coloca jogador no final da fila
+                                fila.enfilera(this);
+                                //Chama próximo jogador
+                                estado = Estados.AUTENTICADO;
+                                servidor.pegaProximoJogador();
 
-                        } else if (TiroEnum.DESCOBERTA == enumerador) {
-                            this.pontos += 2;
-                            resposta = "Descoberta";
-                            resposta += "\n" + tabuleiro.desenhaTabuleiro() + "\nVezJogar";
-                        } else if (TiroEnum.FOGO == enumerador) {
-                            this.pontos += 1;
-                            resposta = "X";
-                            resposta += "\n" + tabuleiro.desenhaTabuleiro();
-                        } else if (TiroEnum.AFUNDAR == enumerador) {
-                            this.pontos += 2;
-                            resposta = "-=";
+                            } else if (TiroEnum.DESCOBERTA == enumerador) {
+                                this.pontos += 2;
+                                resposta = "Descoberta";
+                                resposta += "\n" + tabuleiro.desenhaTabuleiro() + "\nVezJogar";
+                            } else if (TiroEnum.FOGO == enumerador) {
+                                this.pontos += 1;
+                                resposta = "X";
+                                resposta += "\n" + tabuleiro.desenhaTabuleiro();
+                            } else if (TiroEnum.AFUNDAR == enumerador) {
+                                this.pontos += 2;
+                                resposta = "-=\n";
 
-                            //Se foram afundados todos os navios cria novo tabuleiro
-                            if (tabuleiro.fimDeJogo()) {
-                                System.out.println("FIM DE JOGO");
-                                servidor.novoTabuleiro();
-                                resposta += "Fim de jogo";
+                                //Se foram afundados todos os navios cria novo tabuleiro
+                                if (tabuleiro.fimDeJogo()) {                                    
+                                    System.out.println("FIM DE JOGO");                                    
+                                    resposta += "Fim de jogo";
+                                    servidor.novoTabuleiro();
+                                }
+                                resposta += "\n" + tabuleiro.desenhaTabuleiro() + "\nVezJogar";
                             }
-                            resposta += "\n" + tabuleiro.desenhaTabuleiro() + "\nVezJogar";
+                        } catch (Exception e) {
+                            resposta = "ERRO#INFORME COORDENADAS X#Y";
                         }
                         break;
                 }
@@ -189,5 +186,15 @@ public class TarefaCliente implements Runnable {
             socket.close();
 
         }
+
     }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public int getPontos() {
+        return pontos;
+    }
+
 }
